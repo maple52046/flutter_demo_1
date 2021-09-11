@@ -1,76 +1,89 @@
 import 'package:flutter/cupertino.dart';
-import './quiz.dart';
-import './result.dart';
+import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'package:udemy_demo_1/user_transactions.dart';
 
-void main() => runApp(MyApp());
+import 'models/transaction.dart';
+import 'widgets/transactions/form.dart';
 
-class MyApp extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return CupertinoApp(home: HomePage());
-  }
-}
+void main() => runApp(CupertinoApp(
+      theme: CupertinoThemeData(
+        barBackgroundColor: Colors.indigo[800],
+        scaffoldBackgroundColor: CupertinoColors.white,
+        // textTheme: CupertinoTextThemeData(textStyle: GoogleFonts.lemon()),
+      ),
+      home: HomePage(),
+    ));
 
 class HomePage extends StatefulWidget {
+  const HomePage({Key? key}) : super(key: key);
+
   @override
-  State<StatefulWidget> createState() {
-    return _HomePageState();
-  }
+  _HomePageState createState() => _HomePageState();
 }
 
-const questions = const [
-  {
-    'question': 'What is your favorite color ?',
-    'answers': [
-      {'label': 'Red', 'score': 2},
-      {'label': 'Yellow', 'score': 3},
-      {'label': 'Blue', 'score': 8},
-      {'label': 'Green', 'score': 6},
-      {'label': 'Black', 'score': 9},
-    ],
-  },
-  {
-    'question': 'Who is your favorite girl ?',
-    'answers': [
-      {'label': 'Dorrit', 'score': 5},
-      {'label': 'Bear', 'score': 9},
-    ],
-  }
-];
-
 class _HomePageState extends State<HomePage> {
-  var _questionId = 0;
-  var _totalScore = 0;
+  final List<Transaction> _transactions = [];
 
-  void answerQestion(int score) {
+  void _submitNexTx(String title, double amount) {
+    var id = (_transactions.length + 1).toString();
+    var tx = Transaction(
+      id: id,
+      title: title,
+      amount: amount,
+      date: DateTime.now(),
+    );
     setState(() {
-      // questionId = (questionId + 1) % 2;
-      _questionId += 1;
-      _totalScore += score;
+      _transactions.add(tx);
     });
   }
 
-  void resetQuiz() {
-    setState(() {
-      _questionId = 0;
-      _totalScore = 0;
-    });
+  void _addNewTransaction(BuildContext context) {
+    showCupertinoModalPopup(
+      context: context,
+      builder: (_) => GestureDetector(
+        onTap: () {},
+        child: TransactionForm((String title, double amount) {
+          _submitNexTx(title, amount);
+          Navigator.of(context).pop();
+        }),
+      ),
+    );
   }
+
+  // void _selectTransactionDate() {
+  //   var now = DateTime.now();
+  //   showDatePicker(
+  //     context: context,
+  //     initialDate: now,
+  //     firstDate: now.subtract(Duration(days: 7)),
+  //     lastDate: now,
+  //   );
+  // }
 
   @override
   Widget build(BuildContext context) {
     return CupertinoPageScaffold(
-      navigationBar: CupertinoNavigationBar(middle: Text('My Demo App')),
-      child: _questionId < questions.length
-          ? Quiz(
-              questions: questions,
-              questionId: _questionId,
-              answerHandler: answerQestion,
-            )
-          : Result(
-              score: _totalScore,
-              resetCallback: resetQuiz,
-            ),
+      navigationBar: CupertinoNavigationBar(
+        middle: Text(
+          'Personal Expenses',
+          style: GoogleFonts.pacifico(),
+        ),
+        padding: EdgeInsetsDirectional.only(bottom: 5, end: 5),
+        trailing: CupertinoButton(
+          child: Icon(
+            CupertinoIcons.add,
+            color: CupertinoColors.white,
+          ),
+          padding: EdgeInsetsDirectional.only(bottom: 5),
+          onPressed: () => _addNewTransaction(context),
+        ),
+      ),
+      child: SafeArea(
+        child: SingleChildScrollView(
+          child: UserTransactions(_transactions),
+        ),
+      ),
     );
   }
 }
