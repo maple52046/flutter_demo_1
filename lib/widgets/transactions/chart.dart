@@ -1,8 +1,7 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:udemy_demo_1/models/transaction.dart';
-import 'package:udemy_demo_1/widgets/text_title.dart';
+import 'package:udemy_demo_1/widgets/typographies/titles.dart';
 
 class _ChartBar extends StatelessWidget {
   final String label;
@@ -16,12 +15,12 @@ class _ChartBar extends StatelessWidget {
     return Column(
       children: [
         Text('\$${amount.toStringAsFixed(0)}'),
-        SizedBox(
+        const SizedBox(
           height: 4,
         ),
         Container(
           height: 60,
-          width: 10,
+          width: 20,
           child: Stack(
             children: [
               Container(
@@ -37,14 +36,13 @@ class _ChartBar extends StatelessWidget {
               FractionallySizedBox(
                 heightFactor: percentage,
                 child: Container(
-                  decoration:
-                      BoxDecoration(color: CupertinoColors.systemYellow),
+                  decoration: BoxDecoration(color: Colors.yellow[800]),
                 ),
               ),
             ],
           ),
         ),
-        SizedBox(
+        const SizedBox(
           height: 4,
         ),
         Text(label),
@@ -86,15 +84,19 @@ class TransactionChart extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      elevation: 6,
-      margin: EdgeInsets.all(20),
-      child: Padding(
-        padding: const EdgeInsets.all(8),
-        child: Column(
-          children: [
-            Title22('Cost Board'),
-            Row(
+    return Column(
+      children: [
+        Padding(
+          padding: const EdgeInsets.all(2),
+          child: Title22('Cost Board'),
+        ),
+        Card(
+          elevation: 6,
+          // margin: EdgeInsets.only(left: 20, top: 2, bottom: 20, right: 20),
+          margin: const EdgeInsets.all(10).copyWith(top: 2),
+          child: Padding(
+            padding: const EdgeInsets.all(10),
+            child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: groupedTxValues.map((v) {
                 final day = v['day'] as String;
@@ -107,9 +109,32 @@ class TransactionChart extends StatelessWidget {
                 );
               }).toList(),
             ),
-          ],
+          ),
         ),
-      ),
+      ],
+    );
+  }
+}
+
+class ChartVisibleSwitch extends StatelessWidget {
+  final bool visible;
+  final Function onChange;
+
+  ChartVisibleSwitch(this.visible, this.onChange);
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        Text('Show Chart', style: Theme.of(context).textTheme.subtitle1),
+        Switch.adaptive(
+          value: visible,
+          onChanged: (val) {
+            onChange(val);
+          },
+        )
+      ],
     );
   }
 }

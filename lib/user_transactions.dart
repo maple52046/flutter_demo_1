@@ -1,14 +1,19 @@
-import 'package:flutter/cupertino.dart';
-import 'package:udemy_demo_1/models/transaction.dart';
-import 'package:udemy_demo_1/widgets/transactions/chart.dart';
-import 'package:udemy_demo_1/widgets/transactions/list.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
+import './models/transaction.dart';
+import './widgets/transactions/chart.dart';
+import './widgets/transactions/list.dart';
 
 class UserTransactions extends StatelessWidget {
   final List<Transaction> transactions;
-  // final Function newTxCallback;
+  final Function deleteTx;
+  final bool showChart;
 
-  // UserTransactions(this.transactions, this.newTxCallback);
-  UserTransactions(this.transactions);
+  UserTransactions(
+    this.showChart,
+    this.transactions,
+    this.deleteTx,
+  );
 
   @override
   Widget build(BuildContext context) {
@@ -16,9 +21,11 @@ class UserTransactions extends StatelessWidget {
       // mainAxisAlignment: MainAxisAlignment.center,
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        TransactionChart(transactions),
-        // TransactionForm(newTxCallback),
-        TransactionList(transactions),
+        if (showChart) TransactionChart(transactions),
+        Container(
+          height: MediaQuery.of(context).size.height * 0.7,
+          child: TransactionList(transactions, this.deleteTx),
+        ),
       ],
     );
   }

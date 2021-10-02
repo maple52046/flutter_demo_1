@@ -1,21 +1,9 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:udemy_demo_1/models/transaction.dart';
 import 'package:google_fonts/google_fonts.dart';
-
-class _TxId extends StatelessWidget {
-  final String txId;
-  _TxId(this.txId);
-
-  @override
-  Widget build(BuildContext context) {
-    return CircleAvatar(
-      radius: 30,
-      child: Text(txId),
-    );
-  }
-}
+import 'package:udemy_demo_1/models/transaction.dart';
+import './buttons/del.dart';
 
 class _TxAmount extends StatelessWidget {
   final double amount;
@@ -39,7 +27,7 @@ class _TxAmount extends StatelessWidget {
         style: GoogleFonts.mcLaren(
           textStyle: TextStyle(
             color: Colors.deepOrange,
-            fontSize: 20,
+            fontSize: 14,
             fontWeight: FontWeight.bold,
           ),
         ),
@@ -74,44 +62,23 @@ class _TxDate extends StatelessWidget {
   }
 }
 
-// class _TxContent extends StatelessWidget {
-//   final String title;
-//   final DateTime date;
-//   _TxContent(this.title, this.date);
-//   @override
-//   Widget build(BuildContext context) {
-//     return Column(
-//       crossAxisAlignment: CrossAxisAlignment.start,
-//       children: [
-//         _TxTitle(title),
-//         _TxDate(date),
-//       ],
-//     );
-//   }
-// }
-
 class TransactionCard extends StatelessWidget {
   final Transaction tx;
+  final Function onDelete;
 
-  TransactionCard(this.tx);
+  TransactionCard(this.tx, this.onDelete);
 
   @override
   Widget build(BuildContext context) {
-    // return Card(
-    //   child: Row(
-    //     children: [
-    //       _TxAmount(tx.amount),
-    //       _TxContent(tx.title, tx.date),
-    //     ],
-    //   ),
-    // );
-
+    final isLandscaped = MediaQuery.of(context).size.width > 500;
     return Card(
       child: ListTile(
-        leading: _TxId(tx.id),
+        leading: _TxAmount(tx.amount),
         title: _TxTitle(tx.title),
         subtitle: _TxDate(tx.date),
-        trailing: _TxAmount(tx.amount),
+        trailing: DeleteTxButton(isLandscaped, () {
+          onDelete(tx.id);
+        }),
       ),
     );
   }

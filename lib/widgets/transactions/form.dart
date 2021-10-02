@@ -1,8 +1,13 @@
+import 'dart:io';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
-import 'package:udemy_demo_1/widgets/text_title.dart';
+import 'package:intl/intl.dart';
+import 'package:udemy_demo_1/widgets/typographies/titles.dart';
+import './fields.dart';
+import './buttons/submit.dart';
 
 class _FormLabel extends StatelessWidget {
   final String label;
@@ -16,7 +21,7 @@ class _FormLabel extends StatelessWidget {
       child: Text(
         '$label:',
         style: TextStyle(
-          color: CupertinoColors.black,
+          color: Colors.black,
           fontWeight: FontWeight.bold,
         ),
       ),
@@ -39,21 +44,8 @@ class _FormTextField extends StatelessWidget {
   Widget build(BuildContext context) {
     final TextInputType kt =
         (inputType != null) ? inputType as TextInputType : TextInputType.text;
-    return CupertinoTextField(
-      placeholder: placeholder,
-      placeholderStyle: TextStyle(
-        fontSize: 20,
-        color: CupertinoColors.systemGrey,
-      ),
-      style: TextStyle(
-        fontSize: 20,
-        color: CupertinoColors.black,
-      ),
-      decoration: BoxDecoration(
-        color: CupertinoColors.white,
-      ),
-      controller: controller,
-      keyboardType: kt,
+    return Expanded(
+      child: NewTxTextField(placeholder, controller, kt),
     );
   }
 }
@@ -73,25 +65,39 @@ class _TransactionFormRow extends StatelessWidget {
       margin: EdgeInsets.symmetric(vertical: 5, horizontal: 15),
       decoration: BoxDecoration(
         border: Border.all(
-          color: CupertinoColors.lightBackgroundGray,
+          color: Colors.grey,
           width: 1,
         ),
       ),
-      child: CupertinoFormRow(
-        prefix: _FormLabel(label),
-        child: child,
+      child: Row(
+        children: [
+          _FormLabel(label),
+          child,
+        ],
       ),
     );
   }
 }
 
-class TransactionForm extends StatelessWidget {
+class TransactionForm extends StatefulWidget {
+  final Function pickDate;
+  final Function newTx;
+  TransactionForm(this.pickDate, this.newTx);
+
+  @override
+  _TransactionFormState createState() => _TransactionFormState();
+}
+
+class _TransactionFormState extends State<TransactionForm> {
   final titleController = TextEditingController();
   final amountController = TextEditingController();
-  // final Function enableDatePicker;
-  final Function newTxCallback;
+  DateTime date = DateTime.now();
 
-  TransactionForm(this.newTxCallback);
+  void setTxDate(DateTime val) {
+    setState(() {
+      date = val;
+    });
+  }
 
   void submit() {
     final title = titleController.text;
@@ -101,17 +107,22 @@ class TransactionForm extends StatelessWidget {
       return;
     }
 
-    newTxCallback(title, amount);
+    widget.newTx(title, amount, date);
     titleController.clear();
     amountController.clear();
   }
 
   @override
   Widget build(BuildContext context) {
+    final calendarToday =
+        Platform.isIOS ? CupertinoIcons.calendar_today : Icons.calendar_today;
+
     return Card(
-      elevation: 2,
+      elevation: 5,
       child: Container(
-        height: 550,
+        height: double.infinity,
+        // padding: EdgeInsets.only(
+        //     bottom: MediaQuery.of(context).viewInsets.bottom + 10),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.end,
           children: [
@@ -138,14 +149,21 @@ class TransactionForm extends StatelessWidget {
             ),
             _TransactionFormRow(
               label: 'Date',
-              child: CupertinoButton(
-                child: Text('pick'),
-                onPressed: () {},
+              child: Row(
+                children: [
+                  Text(DateFormat().format(date)),
+                  IconButton(
+                    icon: Icon(calendarToday),
+                    onPressed: () {
+                      widget.pickDate(setTxDate);
+                    },
+                  ),
+                ],
               ),
             ),
-            CupertinoButton(
-              child: Text('Add Transcation'),
-              onPressed: submit,
+            Padding(
+              padding: const EdgeInsets.only(right: 15),
+              child: SubmitNewTxButton(submit),
             ),
           ],
         ),
