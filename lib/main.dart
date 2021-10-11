@@ -1,76 +1,125 @@
+import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
-import './quiz.dart';
-import './result.dart';
+import 'package:google_fonts/google_fonts.dart';
 
-void main() => runApp(MyApp());
+import './models/transaction.dart';
+import './widgets/layouts/scaffold.dart';
+import './widgets/transactions/buttons/add.dart';
+import './widgets/transactions/chart.dart';
+import './widgets/transactions/form.dart';
+import './user_transactions.dart';
 
-class MyApp extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return CupertinoApp(home: HomePage());
-  }
+void main() {
+  runApp(MaterialApp(
+    theme: ThemeData(
+      appBarTheme: AppBarTheme(
+        backgroundColor: Colors.indigo[800],
+        centerTitle: true,
+      ),
+      scaffoldBackgroundColor: CupertinoColors.white,
+      // textTheme: CupertinoTextThemeData(textStyle: GoogleFonts.lemon()),
+      primaryColor: CupertinoColors.activeBlue,
+      // primarySwatch: Colors.blue,
+    ),
+    home: HomePage(),
+  ));
 }
 
 class HomePage extends StatefulWidget {
+  const HomePage({Key? key}) : super(key: key);
+
   @override
-  State<StatefulWidget> createState() {
-    return _HomePageState();
-  }
+  _HomePageState createState() => _HomePageState();
 }
 
-const questions = const [
-  {
-    'question': 'What is your favorite color ?',
-    'answers': [
-      {'label': 'Red', 'score': 2},
-      {'label': 'Yellow', 'score': 3},
-      {'label': 'Blue', 'score': 8},
-      {'label': 'Green', 'score': 6},
-      {'label': 'Black', 'score': 9},
-    ],
-  },
-  {
-    'question': 'Who is your favorite girl ?',
-    'answers': [
-      {'label': 'Dorrit', 'score': 5},
-      {'label': 'Bear', 'score': 9},
-    ],
-  }
-];
-
 class _HomePageState extends State<HomePage> {
-  var _questionId = 0;
-  var _totalScore = 0;
+  final List<Transaction> _transactions = [];
+  bool _showChart = false;
 
-  void answerQestion(int score) {
+  void _submitNexTx(String title, double amount, DateTime date) {
+    var id = (_transactions.length + 1).toString();
+    var tx = Transaction(
+      id: id,
+      title: title,
+      amount: amount,
+      date: date,
+    );
     setState(() {
-      // questionId = (questionId + 1) % 2;
-      _questionId += 1;
-      _totalScore += score;
+      _transactions.add(tx);
     });
   }
 
-  void resetQuiz() {
+  void _addNewTransaction(BuildContext ctx) {
+    final callback = (String title, double amount, DateTime date) {
+      _submitNexTx(title, amount, date);
+      Navigator.of(context).pop();
+    };
+
+    showModalBottomSheet(
+      context: ctx,
+      builder: (_) => GestureDetector(
+        onTap: () {},
+        child: TransactionForm(_selectTransactionDate, callback),
+        behavior: HitTestBehavior.opaque,
+      ),
+    );
+  }
+
+  void _deleteTransaction(String txId) {
     setState(() {
-      _questionId = 0;
-      _totalScore = 0;
+      // print('delete transaction: $txId');
+      _transactions.removeWhere((tx) => tx.id == txId);
+    });
+  }
+
+  void _selectTransactionDate(Function callback) {
+    var now = DateTime.now();
+    showDatePicker(
+      context: context,
+      initialDate: now,
+      firstDate: now.subtract(Duration(days: 7)),
+      lastDate: now,
+    ).then((value) {
+      if (value != null) {
+        callback(value);
+      }
     });
   }
 
   @override
   Widget build(BuildContext context) {
-    return CupertinoPageScaffold(
-      navigationBar: CupertinoNavigationBar(middle: Text('My Demo App')),
-      child: _questionId < questions.length
-          ? Quiz(
-              questions: questions,
-              questionId: _questionId,
-              answerHandler: answerQestion,
-            )
-          : Result(
-              score: _totalScore,
-              resetCallback: resetQuiz,
+    final mediaQuery = MediaQuery.of(context);
+    final isLanscaped = mediaQuery.orientation == Orientation.landscape;
+
+    return MyAppScaffold(
+      title: Text(
+        'Personal Expenses',
+        style: GoogleFonts.pacifico().apply(color: Colors.white),
+        // padding: EdgeInsetsDirectional.only(bottom: 5, end: 5),
+      ),
+      trail: AddNewTxButton(() {
+        print('adding new tx...');
+        _addNewTransaction(context);
+      }),
+      body: SafeArea(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            if (isLanscaped)
+              ChartVisibleSwitch(_showChart, (bool val) {
+                setState(() {
+                  print('set chart visibility: $val');
+                  _showChart = val;
+                });
+              }),
+            UserTransactions(
+              !isLanscaped || _showChart,
+              _transactions,
+              _deleteTransaction,
             ),
+          ],
+        ),
+      ),
     );
   }
 }
