@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:udemy_demo_1/providers/cart.dart';
+import 'package:udemy_demo_1/providers/cart.dart' as crt;
 
-class CartItemCard extends StatelessWidget {
-  final CartItem item;
+class CartItem extends StatelessWidget {
+  final crt.CartItem item;
 
-  CartItemCard(this.item);
+  CartItem(this.item);
 
   @override
   Widget build(BuildContext context) {
@@ -13,23 +13,23 @@ class CartItemCard extends StatelessWidget {
       key: ValueKey(item.id),
       background: Container(
         color: Theme.of(context).errorColor,
-        child: Icon(Icons.delete, color: Colors.white, size: 40),
+        child: const Icon(Icons.delete, color: Colors.white, size: 40),
         alignment: Alignment.centerRight,
-        padding: EdgeInsets.only(right: 10),
-        // margin: EdgeInsets.symmetric(horizontal: 15, vertical: 4),
+        padding: const EdgeInsets.only(right: 10),
       ),
       direction: DismissDirection.endToStart,
       onDismissed: (_) {
-        Provider.of<Cart>(context, listen: false).removeItem(item.productId);
+        Provider.of<crt.Cart>(context, listen: false)
+            .removeItem(item.productId);
       },
       child: Card(
-        margin: EdgeInsets.symmetric(horizontal: 15, vertical: 4),
+        margin: const EdgeInsets.symmetric(horizontal: 15, vertical: 4),
         child: Padding(
-          padding: EdgeInsets.all(8),
+          padding: const EdgeInsets.all(8),
           child: ListTile(
             leading: CircleAvatar(
               child: Container(
-                padding: EdgeInsets.all(2),
+                padding: const EdgeInsets.all(2),
                 child: FittedBox(child: Text('\$${item.price}')),
               ),
             ),

@@ -5,9 +5,6 @@ import 'package:udemy_demo_1/providers/product.dart';
 import 'package:udemy_demo_1/screens/product_detail_screen.dart';
 
 class ProductItem extends StatelessWidget {
-  // final Product product;
-  // ProductItem(this.product);
-
   Widget shoppingCartBtn(Product product, Color iconColor) {
     return Consumer<Cart>(
       builder: (ctx, cart, _) => IconButton(

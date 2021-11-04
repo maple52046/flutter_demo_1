@@ -2,10 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:udemy_demo_1/providers/cart.dart';
 import 'package:udemy_demo_1/providers/products.dart';
-import 'package:udemy_demo_1/screens/cart_screen.dart';
 import 'package:udemy_demo_1/widgets/app_drawer.dart';
 import 'package:udemy_demo_1/widgets/badge.dart';
 import 'package:udemy_demo_1/widgets/products_grid.dart';
+import 'cart_screen.dart';
 
 enum FilterOptions {
   FavoriteOnly,
@@ -33,12 +33,13 @@ class ProductsOverflowScreen extends StatelessWidget {
     return Consumer<Products>(
       builder: (ctx, products, _) => PopupMenuButton(
         icon: Icon(Icons.more_vert),
-        itemBuilder: (ctx) => [
+        itemBuilder: (ctx) => const [
           PopupMenuItem(
-              child: const Text('Only Favorites!'),
-              value: FilterOptions.FavoriteOnly),
+            child: Text('Only Favorites!'),
+            value: FilterOptions.FavoriteOnly,
+          ),
           PopupMenuItem(
-            child: const Text('Show all'),
+            child: Text('Show all'),
             value: FilterOptions.All,
           ),
         ],
@@ -69,7 +70,7 @@ class ProductsOverflowScreen extends StatelessWidget {
         ],
       ),
       body: ProductsGrid(),
-      drawer: AppDrawer(),
+      drawer: const AppDrawer(),
     );
   }
 }

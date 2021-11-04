@@ -1,20 +1,18 @@
 import 'dart:math';
-
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 import 'package:udemy_demo_1/providers/cart.dart';
-import 'package:udemy_demo_1/providers/orders.dart';
+import 'package:udemy_demo_1/providers/orders.dart' as ord;
 
-class OrderItemCard extends StatefulWidget {
-  final OrderItem order;
+class OrderItem extends StatefulWidget {
+  final ord.OrderItem order;
 
-  OrderItemCard(this.order);
+  OrderItem(this.order);
 
   @override
-  _OrderItemCardState createState() => _OrderItemCardState();
+  _OrderItemState createState() => _OrderItemState();
 }
 
-class _OrderItemCardState extends State<OrderItemCard> {
+class _OrderItemState extends State<OrderItem> {
   bool _expand = false;
 
   Widget buildItem(CartItem item) {
