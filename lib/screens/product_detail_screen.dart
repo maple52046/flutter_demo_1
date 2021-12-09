@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:udemy_demo_1/providers/products.dart';
+import 'package:udemy_demo_1/constant.dart' as constant;
 
 class ProductDetailScreen extends StatelessWidget {
   static const routeName = '/products/details';
@@ -24,7 +25,7 @@ class ProductDetailScreen extends StatelessWidget {
             const SizedBox(height: 10),
             Text(
               '\$${product.price}',
-              style: const TextStyle(color: Colors.grey, fontSize: 20),
+              style: const TextStyle(color: constant.grey, fontSize: 20),
             ),
             const SizedBox(height: 10),
             Padding(
