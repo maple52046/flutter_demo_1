@@ -2,6 +2,7 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:udemy_demo_1/providers/cart.dart';
 import 'package:udemy_demo_1/providers/orders.dart' as ord;
+import 'package:udemy_demo_1/constant.dart' as constant;
 
 class OrderItem extends StatefulWidget {
   final ord.OrderItem order;
@@ -23,17 +24,11 @@ class _OrderItemState extends State<OrderItem> {
         children: [
           Text(
             item.title,
-            style: const TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.bold,
-            ),
+            style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
           ),
           Text(
             '${item.quantity}x \$${item.price}',
-            style: const TextStyle(
-              fontSize: 18,
-              color: Colors.grey,
-            ),
+            style: const TextStyle(fontSize: 18, color: constant.grey),
           )
         ],
       ),
@@ -58,15 +53,6 @@ class _OrderItemState extends State<OrderItem> {
               },
             ),
           ),
-          // Container(
-          //   height: expand ? widget.order.items.length * 50 : 0,
-          //   child: ListView.builder(
-          //     itemCount: expand ? widget.order.items.length : 0,
-          //     itemBuilder: (ctx, i) => ListTile(
-          //       title: Text(widget.order.items[i].title),
-          //     ),
-          //   ),
-          // ),
           if (_expand)
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 4),

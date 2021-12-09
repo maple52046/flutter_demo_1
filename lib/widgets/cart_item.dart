@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:udemy_demo_1/providers/cart.dart' as crt;
+import 'package:udemy_demo_1/constant.dart' as constant;
 
 class CartItem extends StatelessWidget {
   final crt.CartItem item;
@@ -13,11 +14,38 @@ class CartItem extends StatelessWidget {
       key: ValueKey(item.id),
       background: Container(
         color: Theme.of(context).errorColor,
-        child: const Icon(Icons.delete, color: Colors.white, size: 40),
+        child: const Icon(Icons.delete, color: constant.white, size: 40),
         alignment: Alignment.centerRight,
         padding: const EdgeInsets.only(right: 10),
       ),
       direction: DismissDirection.endToStart,
+      confirmDismiss: (_) {
+        return showDialog(
+          context: context,
+          builder: (ctx) => AlertDialog(
+            title: const Text('Delete Confirm'),
+            content: const Text('Do you want to remove this item from cart?'),
+            actions: [
+              TextButton(
+                child: const Text('NO'),
+                onPressed: () {
+                  /*
+                    1. ctx is passed from builder.
+                    2. pop boolean to confirmDismiss.
+                  */
+                  Navigator.of(ctx).pop(false);
+                },
+              ),
+              TextButton(
+                child: const Text('YES'),
+                onPressed: () {
+                  Navigator.of(ctx).pop(true);
+                },
+              ),
+            ],
+          ),
+        );
+      },
       onDismissed: (_) {
         Provider.of<crt.Cart>(context, listen: false)
             .removeItem(item.productId);

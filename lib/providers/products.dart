@@ -16,8 +16,7 @@ class Products with ChangeNotifier {
       title: 'Trousers',
       description: 'A nice pair of trousers.',
       price: 59.99,
-      imgUrl:
-          'https://upload.wikimedia.org/wikipedia/commons/thumb/e/e8/Trousers%2C_dress_%28AM_1960.022-8%29.jpg/512px-Trousers%2C_dress_%28AM_1960.022-8%29.jpg',
+      imgUrl: 'http://tw2.maple52046.tk/dev/trousers.jpg',
     ),
     Product(
       id: 'p3',
@@ -31,8 +30,7 @@ class Products with ChangeNotifier {
       title: 'A Pan',
       description: 'Prepare any meal you want.',
       price: 49.99,
-      imgUrl:
-          'https://upload.wikimedia.org/wikipedia/commons/thumb/1/14/Cast-Iron-Pan.jpg/1024px-Cast-Iron-Pan.jpg',
+      imgUrl: 'http://tw2.maple52046.tk/dev/pan.jpg',
     ),
   ];
 
@@ -51,8 +49,22 @@ class Products with ChangeNotifier {
   }
 
   void addProduct(Product product) {
+    var productId = 'p${_items.length + 1}';
+    product.id = productId;
     _items.add(product);
     notifyListeners();
+  }
+
+  void removeProductById(int index) {
+    _items.removeAt(index);
+    notifyListeners();
+  }
+
+  void removeProduct(Product product) {
+    if (_items.contains(product)) {
+      _items.remove(product);
+      print('remove product: ${product.title}');
+    }
   }
 
   void showAll() {

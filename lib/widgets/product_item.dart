@@ -3,20 +3,48 @@ import 'package:provider/provider.dart';
 import 'package:udemy_demo_1/providers/cart.dart';
 import 'package:udemy_demo_1/providers/product.dart';
 import 'package:udemy_demo_1/screens/product_detail_screen.dart';
+import 'package:udemy_demo_1/constant.dart' as constant;
+
+const _inCart = const Icon(Icons.shopping_cart, key: const Key('in_cart'));
+const _notInCart = const Icon(
+  Icons.shopping_cart_outlined,
+  key: const Key('not_in_cart'),
+);
+const _isFavorite = const Icon(Icons.favorite, key: const Key('is_favorite'));
+const _isNotFavorite = const Icon(
+  Icons.favorite_outline,
+  key: const Key('is_not_favorite'),
+);
 
 class ProductItem extends StatelessWidget {
-  Widget shoppingCartBtn(Product product, Color iconColor) {
+  Widget shoppingCartBtn(
+    BuildContext context,
+    Product product,
+    Color iconColor,
+  ) {
     return Consumer<Cart>(
       builder: (ctx, cart, _) => IconButton(
-        icon: Icon(
-          cart.productInCart(product.id)
-              ? Icons.shopping_cart
-              : Icons.shopping_cart_outlined,
-        ),
+        icon: cart.productInCart(product.id) ? _inCart : _notInCart,
         color: iconColor,
         onPressed: () {
           print('add ${product.title} to cart...');
           cart.addItem(product);
+          ScaffoldMessenger.of(context).hideCurrentSnackBar();
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(
+                'Added ${product.title} to cart',
+                textAlign: TextAlign.center,
+              ),
+              duration: const Duration(seconds: 2),
+              action: SnackBarAction(
+                label: 'UNDO',
+                onPressed: () {
+                  cart.reduceItem(product.id);
+                },
+              ),
+            ),
+          );
         },
       ),
     );
@@ -24,7 +52,7 @@ class ProductItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final iconColor = Theme.of(context).accentColor;
+    final iconColor = Theme.of(context).colorScheme.secondary;
     final product = Provider.of<Product>(context);
 
     return ClipRRect(
@@ -42,10 +70,9 @@ class ProductItem extends StatelessWidget {
             fit: BoxFit.cover,
           ),
           footer: GridTileBar(
-            backgroundColor: const Color.fromRGBO(33, 47, 61, 0.7),
+            backgroundColor: constant.navyBlueColors[600],
             leading: IconButton(
-              icon: Icon(
-                  product.isFavorite ? Icons.favorite : Icons.favorite_outline),
+              icon: product.isFavorite ? _isFavorite : _isNotFavorite,
               color: iconColor,
               onPressed: () {
                 product.toggleFavoriteStatus();
@@ -55,7 +82,7 @@ class ProductItem extends StatelessWidget {
               product.title,
               textAlign: TextAlign.center,
             ),
-            trailing: shoppingCartBtn(product, iconColor),
+            trailing: shoppingCartBtn(context, product, iconColor),
           ),
         ),
       ),

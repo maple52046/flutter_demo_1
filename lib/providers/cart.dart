@@ -17,6 +17,12 @@ class CartItem {
   void addOne() {
     quantity += 1;
   }
+
+  void reduceOne() {
+    if (quantity > 1) {
+      quantity -= 1;
+    }
+  }
 }
 
 class Cart extends ChangeNotifier {
@@ -50,6 +56,19 @@ class Cart extends ChangeNotifier {
       product.id,
       () => CartItem(itemId, product.id, product.title, product.price),
     );
+    notifyListeners();
+  }
+
+  void reduceItem(String productId) {
+    if (!_items.containsKey(productId)) {
+      return;
+    }
+
+    if (_items[productId]!.quantity == 1) {
+      return removeItem(productId);
+    }
+
+    _items[productId]!.reduceOne();
     notifyListeners();
   }
 
