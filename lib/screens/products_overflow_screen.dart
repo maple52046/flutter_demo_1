@@ -12,8 +12,49 @@ enum FilterOptions {
   All,
 }
 
-class ProductsOverflowScreen extends StatelessWidget {
+class ProductsOverviewScreen extends StatefulWidget {
   // final List<Product> products = [];
+
+  @override
+  State<ProductsOverviewScreen> createState() => _ProductsOverviewScreenState();
+}
+
+class _ProductsOverviewScreenState extends State<ProductsOverviewScreen> {
+  var _isLoading = true;
+
+  @override
+  void didChangeDependencies() {
+    if (_isLoading) {
+      print('loading data in dependencies hook');
+      Provider.of<Products>(context)
+          .fetchItems()
+          .then((_) => setState(() {
+                _isLoading = false;
+                print('data loaded');
+              }))
+          .catchError(
+            (err) => showDialog(
+                context: context,
+                builder: (ctx) => AlertDialog(
+                      title: const Text('Fetch Product List Failed'),
+                      content: Text(err.toString()),
+                      actions: [
+                        TextButton(
+                          child: const Text('Close'),
+                          onPressed: () {
+                            setState(() {
+                              _isLoading = false;
+                            });
+                            Navigator.of(context).pop();
+                          },
+                        ),
+                      ],
+                    )),
+          )
+          .then((_) => print('final'));
+    }
+    super.didChangeDependencies();
+  }
 
   Widget buildCart(BuildContext context) {
     return Consumer<Cart>(
@@ -69,7 +110,9 @@ class ProductsOverflowScreen extends StatelessWidget {
           buildCart(context),
         ],
       ),
-      body: ProductsGrid(),
+      body: _isLoading
+          ? const Center(child: const CircularProgressIndicator.adaptive())
+          : ProductsGrid(),
       drawer: const AppDrawer(),
     );
   }

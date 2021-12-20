@@ -34,7 +34,7 @@ class MyApp extends StatelessWidget {
           fontFamily: 'Lato',
           primarySwatch: constant.purpleColor,
         ),
-        home: ProductsOverflowScreen(),
+        home: ProductsOverviewScreen(),
         routes: {
           CartScreen.routeName: (ctx) => CartScreen(),
           EditProductScreen.routeName: (ctx) => EditProductScreen(),
