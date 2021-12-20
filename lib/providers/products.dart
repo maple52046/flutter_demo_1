@@ -1,5 +1,6 @@
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
-import 'package:udemy_demo_1/providers/product.dart';
+import './product.dart';
 
 class Products with ChangeNotifier {
   List<Product> _items = [
@@ -48,11 +49,29 @@ class Products with ChangeNotifier {
     return _items.firstWhere((product) => product.id == id);
   }
 
-  void addProduct(Product product) {
-    var productId = 'p${_items.length + 1}';
-    product.id = productId;
-    _items.add(product);
-    notifyListeners();
+  Future addProduct(Product product) {
+    const url = 'http://tw2.maple52046.tk/parse/api/classes/Products';
+    var options = Options(contentType: 'application/json', headers: const {
+      'X-Parse-Application-Id': 'OzJ4sdzzOJF516jMIoW4LwLlu45wWBJl'
+    });
+
+    return Dio()
+        .post<Map<String, dynamic>>(url,
+            data: product.toJson(), options: options)
+        .then((resp) {
+      if (resp.statusCode != 201) {
+        print('add product failed (status: ${resp.statusCode}');
+        print(resp.data);
+        return;
+      }
+      product.id = resp.data!['objectId'] as String;
+      _items.add(product);
+      notifyListeners();
+      print('add product successfully (object id: ${product.id})');
+    }).catchError((err) {
+      print('request failed: $err');
+      throw err;
+    });
   }
 
   void removeProductById(int index) {
