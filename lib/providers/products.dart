@@ -1,7 +1,6 @@
-import 'dart:convert';
-import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
-import 'package:minio/minio.dart';
+import 'package:udemy_demo_1/drivers/minio.dart';
+import 'package:udemy_demo_1/drivers/parse.dart';
 import './product.dart';
 
 class Products with ChangeNotifier {
@@ -40,28 +39,17 @@ class Products with ChangeNotifier {
   bool _showFavoriteOnly = false;
 
   Future fetchItems() {
-    const url = 'http://tw2.maple52046.tk/parse/api/classes/Products';
-    final mc = Minio(
-      endPoint: '117.50.175.140',
-      accessKey: 'O6Mp3e5C9UEuvoO6MqM3Hn59L1A2rO7T',
-      secretKey: 'DC2bGRzcp3b8e0dVA86ukqpMtkT3fc7K',
-      port: 32266,
-      useSSL: false,
-    );
-    var options = Options(contentType: 'application/json', headers: const {
-      'X-Parse-Application-Id': 'OzJ4sdzzOJF516jMIoW4LwLlu45wWBJl'
-    });
-    final dio = Dio();
+    final mc = getMinioClient();
+    final dio = getParseClient();
 
     return mc
         .presignedGetObject('udemy', 'products.json', expires: 3600)
-        .then((target) => dio.get<String>(target, options: options))
+        .then((target) => dio.get<Map<String, dynamic>>(target))
         .then((resp) async {
-      final src = json.decode(resp.data as String) as Map<String, dynamic>;
-      List<dynamic> objectIds = src['object_ids'];
+      List<dynamic> objectIds = resp.data!['object_ids'];
       List<Future<Product>> futures = objectIds
           .map((objectId) => dio
-              .get<Map<String, dynamic>>('$url/$objectId', options: options)
+              .get<Map<String, dynamic>>('/$objectId')
               .then((value) => Product(
                     id: value.data!['objectId'] as String,
                     title: value.data!['title'] as String,
@@ -71,6 +59,7 @@ class Products with ChangeNotifier {
                   )))
           .toList();
       _items = await Future.wait(futures);
+      notifyListeners();
     });
   }
 
@@ -87,14 +76,9 @@ class Products with ChangeNotifier {
   }
 
   Future addProduct(Product product) {
-    const url = 'http://tw2.maple52046.tk/parse/api/classes/Products';
-    var options = Options(contentType: 'application/json', headers: const {
-      'X-Parse-Application-Id': 'OzJ4sdzzOJF516jMIoW4LwLlu45wWBJl'
-    });
-
-    return Dio()
-        .post<Map<String, dynamic>>(url,
-            data: product.toJson(), options: options)
+    final dio = getParseClient();
+    return dio
+        .post<Map<String, dynamic>>('', data: product.toJson())
         .then((resp) {
       if (resp.statusCode != 201) {
         print('add product failed (status: ${resp.statusCode}');
@@ -105,9 +89,6 @@ class Products with ChangeNotifier {
       _items.add(product);
       notifyListeners();
       print('add product successfully (object id: ${product.id})');
-    }).catchError((err) {
-      print('request failed: $err');
-      throw err;
     });
   }
 
