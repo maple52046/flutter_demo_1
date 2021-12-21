@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:flutter/foundation.dart';
+import 'package:udemy_demo_1/drivers/parse.dart';
 
 class Product with ChangeNotifier {
   String id;
@@ -21,6 +22,12 @@ class Product with ChangeNotifier {
   void toggleFavoriteStatus() {
     isFavorite = !isFavorite;
     notifyListeners();
+  }
+
+  Future update() {
+    print('updating product: $id');
+    final dio = getParseClient();
+    return dio.put<Map<String, dynamic>>('/$id', data: toJson());
   }
 
   String toJson() {

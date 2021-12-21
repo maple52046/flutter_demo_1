@@ -1,6 +1,8 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:udemy_demo_1/drivers/minio.dart';
 import 'package:udemy_demo_1/drivers/parse.dart';
+import 'package:udemy_demo_1/models/exceptions.dart';
 import './product.dart';
 
 class Products with ChangeNotifier {
@@ -41,7 +43,7 @@ class Products with ChangeNotifier {
   Future fetchItems() {
     final mc = getMinioClient();
     final dio = getParseClient();
-
+    print('fetching items');
     return mc
         .presignedGetObject('udemy', 'products.json', expires: 3600)
         .then((target) => dio.get<Map<String, dynamic>>(target))
@@ -54,7 +56,8 @@ class Products with ChangeNotifier {
                     id: value.data!['objectId'] as String,
                     title: value.data!['title'] as String,
                     description: value.data!['description'] as String,
-                    price: value.data!['price'] as double,
+                    /* 從 string 型態轉換成 double 可以解決整數問題 */
+                    price: double.parse(value.data!['price'].toString()),
                     imgUrl: value.data!['imgUrl'] as String,
                   )))
           .toList();
@@ -82,26 +85,24 @@ class Products with ChangeNotifier {
         .then((resp) {
       if (resp.statusCode != 201) {
         print('add product failed (status: ${resp.statusCode}');
-        print(resp.data);
-        return;
+        throw resp.data.toString();
       }
       product.id = resp.data!['objectId'] as String;
       _items.add(product);
       notifyListeners();
       print('add product successfully (object id: ${product.id})');
+      return updateProductList();
     });
   }
 
-  void removeProductById(int index) {
-    _items.removeAt(index);
-    notifyListeners();
-  }
-
-  void removeProduct(Product product) {
-    if (_items.contains(product)) {
-      _items.remove(product);
-      print('remove product: ${product.title}');
-    }
+  Future removeProduct(Product product) {
+    final dio = getParseClient();
+    return dio.delete('/${product.id}').then((result) {
+      print('product ${product.id} was deleted');
+      _items.removeWhere((e) => e.id == product.id);
+      notifyListeners();
+      return updateProductList();
+    });
   }
 
   void showAll() {
@@ -112,5 +113,31 @@ class Products with ChangeNotifier {
   void showFavoriteOnly() {
     _showFavoriteOnly = true;
     notifyListeners();
+  }
+
+  Future updateProduct(Product _product) {
+    final i = _items.indexWhere((element) => element.id == _product.id);
+    if (i < 0) {
+      throw ProductNotFound(_product);
+    }
+
+    return _product.update().then((resp) {
+      Map<String, dynamic> result = resp.data;
+      print('product ${_product.id} was updated at ${result["updatedAt"]}');
+      _items[i] = _product;
+      notifyListeners();
+    });
+  }
+
+  Future updateProductList() {
+    print('updating product list');
+    Map<String, List<String>> data = {
+      'object_ids': _items.map((e) => e.id).toList()
+    };
+    final dio = getParseClient();
+    final mc = getMinioClient();
+    return mc
+        .presignedPutObject('udemy', 'products.json', expires: 30)
+        .then((api) => dio.put(api, data: json.encode(data)));
   }
 }

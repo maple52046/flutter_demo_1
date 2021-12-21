@@ -7,9 +7,7 @@ import 'package:udemy_demo_1/widgets/user_product_item.dart';
 import './edit_product_screen.dart';
 
 class UserProductsScreen extends StatelessWidget {
-  const UserProductsScreen({Key? key}) : super(key: key);
   static const routeName = '/users/products';
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -35,22 +33,22 @@ class UserProductsScreen extends StatelessWidget {
       ),
       drawer: AppDrawer(),
       body: Consumer<Products>(
-        builder: (ctx, products, _) => Padding(
-          padding: const EdgeInsets.all(8),
-          child: ListView.builder(
-            itemCount: products.items.length,
-            itemBuilder: (_, i) => Column(
-              children: [
-                UserProductItem(
-                  product: products.items[i],
-                  onDelete: () {
-                    products.removeProductById(i);
-                  },
+        builder: (ctx, products, _) => RefreshIndicator(
+          onRefresh: products.fetchItems,
+          child: products.items.length == 0
+              ? const Center(child: const Text('No Data'))
+              : Padding(
+                  padding: const EdgeInsets.all(8),
+                  child: ListView.builder(
+                    itemCount: products.items.length,
+                    itemBuilder: (_, i) => Column(
+                      children: [
+                        UserProductItem(products.items[i]),
+                        const Divider(),
+                      ],
+                    ),
+                  ),
                 ),
-                const Divider(),
-              ],
-            ),
-          ),
         ),
       ),
     );

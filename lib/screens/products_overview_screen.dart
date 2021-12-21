@@ -50,8 +50,7 @@ class _ProductsOverviewScreenState extends State<ProductsOverviewScreen> {
                         ),
                       ],
                     )),
-          )
-          .then((_) => print('final'));
+          );
     }
     super.didChangeDependencies();
   }

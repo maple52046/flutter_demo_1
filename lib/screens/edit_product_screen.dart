@@ -102,12 +102,28 @@ class _EditProductScreenState extends State<EditProductScreen> {
     super.didChangeDependencies();
   }
 
-  void _saveForm() {
+  bool _saveForm() {
     _isValidated = _form.currentState!.validate();
     if (_isValidated) {
       _form.currentState!.save();
     }
+    return _isValidated;
   }
+
+  Future _showAlert(String title, dynamic err) => showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+            title: Text(title),
+            content: Text(err.toString()),
+            actions: [
+              TextButton(
+                child: const Text('Close'),
+                onPressed: () {
+                  Navigator.of(ctx).pop();
+                },
+              ),
+            ],
+          ));
 
   void _updateImageUrl() {
     if (_imageUrlFocusNode.hasFocus) {
@@ -120,7 +136,7 @@ class _EditProductScreenState extends State<EditProductScreen> {
   }
 
   void _updateProducts() async {
-    if (!_isValidated) {
+    if (!_isValidated && !_saveForm()) {
       return;
     }
 
@@ -128,29 +144,25 @@ class _EditProductScreenState extends State<EditProductScreen> {
       _isLoading = true;
     });
 
+    final products = Provider.of<Products>(context, listen: false);
     if (_editedProduct!.id == '') {
-      await Provider.of<Products>(context, listen: false)
+      await products
           .addProduct(_editedProduct as Product)
-          .catchError((err) => showDialog(
-              context: context,
-              builder: (ctx) => AlertDialog(
-                    title: const Text('Failed to add product!'),
-                    content: Text(err.toString()),
-                    actions: [
-                      TextButton(
-                        child: const Text('OK'),
-                        onPressed: () {
-                          Navigator.of(ctx).pop();
-                        },
-                      ),
-                    ],
-                  )))
+          .catchError((err) => _showAlert('Add Produtct Failed!', err))
           .then((_) => setState(() {
                 _isLoading = false;
                 Navigator.of(context).pop();
               }));
       return;
     }
+
+    await products
+        .updateProduct(_editedProduct as Product)
+        .catchError((err) => _showAlert('Update Product Failed!', err))
+        .then((_) => setState(() {
+              _isLoading = false;
+              Navigator.of(context).pop();
+            }));
   }
 
   @override
